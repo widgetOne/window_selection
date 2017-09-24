@@ -42,7 +42,15 @@ def input_args(data=test_series, indexBegin=3, indexEnd=9, thresholdLo=0.5, thre
 
 @pytest.mark.parametrize('test_name,input_dict,expected', [
     ('basic test', input_args(), [(8, 9)]),
-    ('basic test', input_args(thresholdHi=5.5), [(4, 6), (8, 9)]),
+    ('higher threshold', input_args(thresholdHi=5.1), [(4, 6), (8, 9)]),
+    ('at higher threshold', input_args(thresholdHi=5.0), [(8, 9)]),
+    ('small window', input_args(winLength=1), [(4, 4), (6, 6), (8, 9)]),
+    ('too large window', input_args(winLength=4), []),
+    ('too large window', input_args(winLength=3), []),
+    ('further end index', input_args(indexEnd=12), [(8, 9), (11, 12)]),
+    ('lower threshold over upper', input_args(thresholdLo=5), []),
+    ('ending on part of window', input_args(indexEnd=11), [(8, 9)]),
+    ('starting on partial window', input_args(indexBegin=2), [(8, 9)]),
 ])
 def test_searchMultiContinuityWithinRange(test_name, input_dict, expected):
     print(test_name)
