@@ -15,6 +15,24 @@ def import_data():
     return batting_data_df
 
 
+def convert_index_list_to_window_tuples(index_list, winLength):
+    start_idx = None
+    last_idx = None
+    output_ranges = []
+    for idx in index_list:
+        if start_idx is None:
+            start_idx = idx
+        elif idx != last_idx + 1:
+            if last_idx - start_idx >= winLength - 1:
+                output_ranges.append((start_idx, last_idx))
+            start_idx = idx
+        last_idx = idx
+    # checking if the last entry was part of a large enough section
+    if start_idx is not None and last_idx is not None and last_idx - start_idx >= winLength - 1:
+        output_ranges.append((start_idx, last_idx))
+    return output_ranges
+
+
 def searchContinuityAboveValue(data, indexBegin, indexEnd, threshold, winLength):
     """return start of section that is over the window size"""
     subseries = data[indexBegin:indexEnd+1]
@@ -51,21 +69,8 @@ def searchMultiContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, th
     """return all sections of sufficient length within range"""
     subseries = data[indexBegin:indexEnd+1]
     filtered_series = subseries[(thresholdLo < subseries) & (subseries < thresholdHi)]
-    start_idx = None
-    last_idx = None
-    output_ranges = []
-    for idx, point in filtered_series.iteritems():
-        if start_idx is None:
-            start_idx = idx
-        elif idx != last_idx + 1:
-            if last_idx - start_idx >= winLength - 1:
-                output_ranges.append((start_idx, last_idx))
-            start_idx = idx
-        last_idx = idx
-    # checking if the last entry was part of a large enough section
-    if start_idx is not None and last_idx is not None and last_idx - start_idx >= winLength - 1:
-        output_ranges.append((start_idx, last_idx))
-    return output_ranges
+    tuple_list = convert_index_list_to_window_tuples(filtered_series.index.values, winLength)
+    return tuple_list
 
 
 if __name__ == '__main__':
