@@ -37,22 +37,18 @@ def searchContinuityAboveValue(data, indexBegin, indexEnd, threshold, winLength)
     """return start of section that is over the window size"""
     subseries = data[indexBegin:indexEnd+1]
     filtered_series = subseries[subseries > threshold]
-    start_idx = None
-    last_idx = None
-    for idx, point in filtered_series.iteritems():
-        if start_idx is None:
-            start_idx = idx
-        elif idx != last_idx + 1:
-            start_idx = idx
-        last_idx = idx
-        if idx == start_idx + winLength - 1:
-            return start_idx
-    return None
+    tuple_list = convert_index_list_to_window_tuples(filtered_series.index.values, winLength)
+    if len(tuple_list) > 0:
+        return tuple_list[0][0]  # returning the starting index of the first acceptable window found
 
 
 def backSearchContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thresholdHi, winLength):
     """return start of section that is within the window size"""
-    pass
+    subseries = data[indexBegin:indexEnd+1]
+    filtered_series = subseries[(thresholdLo < subseries) & (subseries < thresholdHi)]
+    tuple_list = convert_index_list_to_window_tuples(filtered_series.index.values, winLength)
+    if len(tuple_list) > 0:
+        return tuple_list[0][0]  # returning the starting index of the first acceptable window found
 
 
 def searchContinuityAboveValueTwoSignals(data1, data2, indexBegin, indexEnd,
@@ -62,8 +58,10 @@ def searchContinuityAboveValueTwoSignals(data1, data2, indexBegin, indexEnd,
     filtered_series_1 = subseries_1[threshold1 < subseries_1]
     subseries_2 = data2[indexBegin:indexEnd+1]
     filtered_series_2 = subseries_2[threshold2 < subseries_2]
-    pandas.concat([filtered_series_1, filtered_series_2], axis=1, join='inner')
-
+    combined_filtered_data = pandas.concat([filtered_series_1, filtered_series_2], axis=1, join='inner')
+    tuple_list = convert_index_list_to_window_tuples(combined_filtered_data.index.values, winLength)
+    if len(tuple_list) > 0:
+        return tuple_list[0][0]  # returning the starting index of the first acceptable window found
 
 def searchMultiContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thresholdHi, winLength):
     """return all sections of sufficient length within range"""
