@@ -22,7 +22,7 @@ def searchContinuityAboveValue(data, indexBegin, indexEnd, threshold, winLength)
     start_idx = None
     last_idx = None
     for idx, point in filtered_series.iteritems():
-        if start_idx is None or last_idx is None:
+        if start_idx is None:
             start_idx = idx
         elif idx != last_idx + 1:
             start_idx = idx
@@ -44,8 +44,24 @@ def searchContinuityAboveValueTwoSignals(data1, data2, indexBegin, indexEnd,
 
 
 def searchMultiContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thresholdHi, winLength):
-    """return all sections within range"""
-    pass
+    """return all sections of sufficient length within range"""
+    subseries = data[indexBegin:indexEnd+1]
+    filtered_series = subseries[(thresholdLo < subseries) & (subseries < thresholdHi)]
+    start_idx = None
+    last_idx = None
+    output_ranges = []
+    for idx, point in filtered_series.iteritems():
+        if start_idx is None:
+            start_idx = idx
+        elif idx != last_idx + 1:
+            if last_idx - start_idx > winLength - 1:
+                output_ranges.append((start_idx, last_idx))
+            start_idx = idx
+        last_idx = idx
+    # checking if the last entry was part of a large enough section
+    if last_idx - start_idx >= winLength - 1:
+        output_ranges.append((start_idx, last_idx))
+    return output_ranges
 
 
 if __name__ == '__main__':
