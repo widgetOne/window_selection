@@ -40,7 +40,11 @@ def backSearchContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thr
 def searchContinuityAboveValueTwoSignals(data1, data2, indexBegin, indexEnd,
                                          threshold1, threshold2, winLength):
     """Return start of section w both signals above threshold"""
-    pass
+    subseries_1 = data1[indexBegin:indexEnd+1]
+    filtered_series_1 = subseries_1[threshold1 < subseries_1]
+    subseries_2 = data2[indexBegin:indexEnd+1]
+    filtered_series_2 = subseries_2[threshold2 < subseries_2]
+    pandas.concat([filtered_series_1, filtered_series_2], axis=1, join='inner')
 
 
 def searchMultiContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thresholdHi, winLength):
