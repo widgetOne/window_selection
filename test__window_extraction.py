@@ -25,6 +25,9 @@ def input_args(data=test_series, indexBegin=3, indexEnd=9, threshold=0.5, winLen
     ('single point after indexbegin', input_args(winLength=1, indexBegin=0), 1),
     ('larger window', input_args(winLength=3, indexBegin=0), 4),
     ('2 points w window of 3', input_args(winLength=3, indexBegin=0, indexEnd=1, threshold=-1), None),
+    ('at threshold float', input_args(threshold=0.99999), 4),
+    ('at threshold int', input_args(indexEnd=12, threshold=1), 11),
+    ('at threshold float', input_args(indexEnd=12, threshold=1.0), 11),
 ])
 def test_searchContinuityAboveValue(test_name, input_dict, expected):
     print(test_name)
