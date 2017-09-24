@@ -35,5 +35,20 @@ def test_searchContinuityAboveValue(test_name, input_dict, expected):
     assert result == expected
 
 
+def input_args(data=test_series, indexBegin=3, indexEnd=9, thresholdLo=0.5, thresholdHi=4.5, winLength=2):
+    return {'data': data, 'indexBegin': indexBegin, 'indexEnd': indexEnd,
+            'thresholdLo': thresholdLo, 'thresholdHi': thresholdHi, 'winLength': winLength}
+
+
+@pytest.mark.parametrize('test_name,input_dict,expected', [
+    ('basic test', input_args(), [(8, 9)]),
+    ('basic test', input_args(thresholdHi=5.5), [(4, 6), (8, 9)]),
+])
+def test_searchMultiContinuityWithinRange(test_name, input_dict, expected):
+    print(test_name)
+    result = searchMultiContinuityWithinRange(**input_dict)
+    assert result == expected
+
+
 if __name__ == '__main__':
     pytest.main()
