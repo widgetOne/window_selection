@@ -54,12 +54,12 @@ def searchMultiContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, th
         if start_idx is None:
             start_idx = idx
         elif idx != last_idx + 1:
-            if last_idx - start_idx > winLength - 1:
+            if last_idx - start_idx >= winLength - 1:
                 output_ranges.append((start_idx, last_idx))
             start_idx = idx
         last_idx = idx
     # checking if the last entry was part of a large enough section
-    if last_idx - start_idx >= winLength - 1:
+    if start_idx is not None and last_idx is not None and last_idx - start_idx >= winLength - 1:
         output_ranges.append((start_idx, last_idx))
     return output_ranges
 
