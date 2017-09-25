@@ -1,6 +1,6 @@
 import pytest
 import pandas
-from window_extraction import *
+from simple_window_extraction import *
 
 
 @pytest.fixture(scope='module')
@@ -38,34 +38,28 @@ def test_searchContinuityAboveValue(test_name, input_dict, expected):
     assert result == expected
 
 
-def input_args_mw(data=test_series, indexBegin=3, indexEnd=9, thresholdLo=0.5, thresholdHi=4.5, winLength=2):
+def input_args_2t_rev(data=test_series, indexBegin=9, indexEnd=3,
+                      thresholdLo=0.5, thresholdHi=4.5, winLength=2):
     return {'data': data, 'indexBegin': indexBegin, 'indexEnd': indexEnd,
             'thresholdLo': thresholdLo, 'thresholdHi': thresholdHi, 'winLength': winLength}
 
-# creating a shared test set for backSearchContinuityWithinRange and searchMultiContinuityWithinRange
-high_and_low_threshold_test_set = [
-    ('basic test', input_args_mw(), [(8, 9)]),
-    ('higher threshold', input_args_mw(thresholdHi=5.1), [(4, 6), (8, 9)]),
-    ('at higher threshold', input_args_mw(thresholdHi=5.0), [(8, 9)]),
-    ('small window', input_args_mw(winLength=1), [(4, 4), (6, 6), (8, 9)]),
-    ('too large window', input_args_mw(winLength=4), []),
-    ('too large window', input_args_mw(winLength=3), []),
-    ('further end index', input_args_mw(indexEnd=12), [(8, 9), (11, 12)]),
-    ('lower threshold over upper', input_args_mw(thresholdLo=5), []),
-    ('ending on part of window', input_args_mw(indexEnd=11), [(8, 9)]),
-    ('starting on partial window', input_args_mw(indexBegin=2), [(8, 9)]),
-]
 
-
-@pytest.mark.parametrize('test_name,input_dict,expected', high_and_low_threshold_test_set)
+@pytest.mark.parametrize('test_name,input_dict,expected', [
+    ('basic test', input_args_2t_rev(), 9),
+    ('higher threshold', input_args_2t_rev(thresholdHi=5.1), 9),
+    ('at higher threshold', input_args_2t_rev(thresholdHi=5.0), 9),
+    ('small window', input_args_2t_rev(winLength=1), 9),
+    ('larger window', input_args_2t_rev(thresholdHi=5.1, winLength=3), 6),
+    ('too large window', input_args_2t_rev(winLength=4), None),
+    ('further end index', input_args_2t_rev(indexBegin=12), 12),
+    ('lower threshold over upper', input_args_2t_rev(thresholdLo=5), None),
+    ('ending on part of window', input_args_2t_rev(indexBegin=11), 9),
+    ('starting on partial window', input_args_2t_rev(indexEnd=2), 9),
+])
 def test_backSearchContinuityWithinRange(test_name, input_dict, expected):
     print(test_name)
     result = backSearchContinuityWithinRange(**input_dict)
-    if len(expected) > 0:
-        expected_index = expected[0][0]
-    else:
-        expected_index = None
-    assert result == expected_index
+    assert result == expected
     
 
 def input_args_2d(data1=test_series, data2=neg_test_series, indexBegin=3, indexEnd=9, threshold1=0.5, threshold2=-4.5, winLength=2):
@@ -95,7 +89,24 @@ def test_searchContinuityAboveValueTwoSignals(test_name, input_dict, expected):
     assert searchContinuityAboveValueTwoSignals(**input_dict) == expected
 
 
-@pytest.mark.parametrize('test_name,input_dict,expected', high_and_low_threshold_test_set)
+def input_args_2t(data=test_series, indexBegin=3, indexEnd=9,
+                      thresholdLo=0.5, thresholdHi=4.5, winLength=2):
+    return {'data': data, 'indexBegin': indexBegin, 'indexEnd': indexEnd,
+            'thresholdLo': thresholdLo, 'thresholdHi': thresholdHi, 'winLength': winLength}
+
+
+@pytest.mark.parametrize('test_name,input_dict,expected', [
+    ('basic test', input_args_2t(), [(8, 9)]),
+    ('higher threshold', input_args_2t(thresholdHi=5.1), [(4, 6), (8, 9)]),
+    ('at higher threshold', input_args_2t(thresholdHi=5.0), [(8, 9)]),
+    ('small window', input_args_2t(winLength=1), [(4, 4), (6, 6), (8, 9)]),
+    ('too large window', input_args_2t(winLength=4), []),
+    ('larger window', input_args_2t(thresholdHi=5.1, winLength=3), [(4, 6)]),
+    ('further end index', input_args_2t(indexEnd=12), [(8, 9), (11, 12)]),
+    ('lower threshold over upper', input_args_2t(thresholdLo=5), []),
+    ('ending on part of window', input_args_2t(indexEnd=11), [(8, 9)]),
+    ('starting on partial window', input_args_2t(indexBegin=2), [(8, 9)]),
+])
 def test_searchMultiContinuityWithinRange(test_name, input_dict, expected):
     print(test_name)
     result = searchMultiContinuityWithinRange(**input_dict)
