@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 import pytest
 import pandas
 
@@ -44,11 +43,11 @@ def searchContinuityAboveValue(data, indexBegin, indexEnd, threshold, winLength)
 
 def backSearchContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thresholdHi, winLength):
     """return start of section that is within the window size"""
-    subseries = data[indexBegin:indexEnd+1]
+    subseries = data[indexEnd:indexBegin+1]
     filtered_series = subseries[(thresholdLo < subseries) & (subseries < thresholdHi)]
     tuple_list = convert_index_list_to_window_tuples(filtered_series.index.values, winLength)
     if len(tuple_list) > 0:
-        return tuple_list[0][0]  # returning the starting index of the first acceptable window found
+        return tuple_list[-1][-1]  # returning the end of the last window
 
 
 def searchContinuityAboveValueTwoSignals(data1, data2, indexBegin, indexEnd,
@@ -62,6 +61,7 @@ def searchContinuityAboveValueTwoSignals(data1, data2, indexBegin, indexEnd,
     tuple_list = convert_index_list_to_window_tuples(combined_filtered_data.index.values, winLength)
     if len(tuple_list) > 0:
         return tuple_list[0][0]  # returning the starting index of the first acceptable window found
+
 
 def searchMultiContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thresholdHi, winLength):
     """return all sections of sufficient length within range"""
