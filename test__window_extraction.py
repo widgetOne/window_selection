@@ -1,6 +1,6 @@
 import pytest
 import pandas
-from simple_window_extraction import *
+from window_extraction import *
 
 
 @pytest.fixture(scope='module')
