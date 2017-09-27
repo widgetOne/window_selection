@@ -18,6 +18,25 @@ def import_data():
     return simple_structure
 
 
+def first_window_in_data(data, index_iter, threshold_function, winLength):
+    start_idx = None
+    for idx in index_iter:
+        point = data[idx]
+        if threshold_function(point):
+            if start_idx is None:
+                start_idx = idx
+            last_idx = idx
+        else:
+            if start_idx is not None:
+                if abs(last_idx - start_idx) >= winLength - 1:
+                    return start_idx, idx - 1
+            start_idx = None
+            last_idx = None
+    if start_idx is not None:
+        if abs(last_idx - start_idx) >= winLength - 1:
+            return start_idx, idx
+
+
 def searchContinuityAboveValue(data, indexBegin, indexEnd, threshold, winLength):
     """
     Returns the starting index of the first window of data within the target indices that
@@ -30,16 +49,11 @@ def searchContinuityAboveValue(data, indexBegin, indexEnd, threshold, winLength)
     :return: integer index of the first window that meets all input criteria (e.g. 8)
              returns None if no valid windows are found
     """
-    start_idx = None
-    for idx in range(indexBegin, indexEnd+1):
-        point = data[idx]
-        if point > threshold:
-            if start_idx is None:
-                start_idx = idx
-            if idx - start_idx >= winLength - 1:
-                return start_idx
-        else:
-            start_idx = None
+    index_iter = range(indexBegin, indexEnd+1)
+    threshold_function = lambda x: x > threshold
+    first_window = first_window_in_data(data, index_iter, threshold_function, winLength)
+    if first_window:
+        return first_window[0]
 
 
 def backSearchContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thresholdHi, winLength):
@@ -56,16 +70,11 @@ def backSearchContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thr
     :return: integer index of the first window (searchiing backwards) that meets all input criteria (e.g. 8)
              returns None if no valid windows are found
     """
-    start_idx = None
-    for idx in range(indexBegin, indexEnd-1, -1):
-        point = data[idx]
-        if thresholdLo < point and point < thresholdHi:
-            if start_idx is None:
-                start_idx = idx
-            if start_idx - idx >= winLength - 1:
-                return start_idx
-        else:
-            start_idx = None
+    index_iter = range(indexBegin, indexEnd-1, -1)
+    threshold_function = lambda x: thresholdLo < x and x < thresholdHi
+    first_window = first_window_in_data(data, index_iter, threshold_function, winLength)
+    if first_window:
+        return first_window[0]
 
 
 def searchContinuityAboveValueTwoSignals(data1, data2, indexBegin, indexEnd,
@@ -83,17 +92,12 @@ def searchContinuityAboveValueTwoSignals(data1, data2, indexBegin, indexEnd,
     :return: integer index of the first window that meets all input criteria (e.g. 8)
              returns None if no valid windows are found
     """
-    start_idx = None
-    for idx in range(indexBegin, indexEnd+1):
-        point1 = data1[idx]
-        point2 = data2[idx]
-        if threshold1 < point1 and threshold2 < point2:
-            if start_idx is None:
-                start_idx = idx
-            if idx - start_idx >= winLength - 1:
-                return start_idx
-        else:
-            start_idx = None
+    data = list(zip(data1, data2))
+    index_iter = range(indexBegin, indexEnd+1)
+    threshold_function = lambda x: threshold1 < x[0] and threshold2 < x[1]
+    first_window = first_window_in_data(data, index_iter, threshold_function, winLength)
+    if first_window:
+        return first_window[0]
 
 
 def searchMultiContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, thresholdHi, winLength):
@@ -109,21 +113,17 @@ def searchMultiContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, th
     :return: list of tuples containing the start and end index of the windows found
             e.g. [(1,4), (6,8)]
     """
+
+    threshold_function = lambda x: thresholdLo < x and x < thresholdHi
+    window_found = True
     windows = []
-    start_idx = None
-    for idx in range(indexBegin, indexEnd+1):
-        point = data[idx]
-        if thresholdLo < point and point < thresholdHi:
-            if start_idx is None:
-                start_idx = idx
-        else:
-            if start_idx is not None:
-                if (idx - 1) - start_idx >= winLength - 1:
-                    windows.append((start_idx, idx - 1))
-            start_idx = None
-    if start_idx is not None:
-        if indexEnd - start_idx >= winLength - 1:
-            windows.append((start_idx, indexEnd))
+    start_idx = indexBegin
+    while window_found:
+        index_iter = range(start_idx, indexEnd + 1)
+        window_found = first_window_in_data(data, index_iter, threshold_function, winLength)
+        if window_found:
+            windows.append(window_found)
+            start_idx = window_found[1] + 1
     return windows
 
 
